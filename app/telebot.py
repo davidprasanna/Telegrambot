@@ -2,9 +2,8 @@ from flask import Flask
 from flask import request
 from flask import Response
 import requests
-import base64
 from requests.structures import CaseInsensitiveDict
-import database
+import database as database
 import pandas as pd
 from config import get_config
 from selenium import webdriver
@@ -14,13 +13,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from database import Restaurent, close_session, commit_session, insert_row, db
- 
+
 config_data = get_config()
 
 TOKEN = "5823544860:AAEKfEG4zhGUjOD5q_6rGRnH2fqTqdeR9lU"
 app = Flask(__name__)
 
-print("config_data:",config_data['Database_credentials']['Database_username'])
 db_uri = "postgresql://{0}:{1}@{2}/{3}".format(config_data['Database_credentials']['Database_username'],config_data['Database_credentials']['Database_password'],config_data['Database_credentials']['host'],config_data['Database_credentials']['Database_name'])
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -44,7 +42,6 @@ def tel_send_message(chat_id, text, mode):
                 }
    
     r = requests.post(url,json=payload)
-    print("r:",r)
     return r
 
 def tel_send_image(chat_id,photo):
@@ -54,7 +51,6 @@ def tel_send_image(chat_id,photo):
                 'photo': photo,
                 }
     r = requests.post(url,json=payload)
-    print("send img:",r.text)
     return r
 
 def tel_send_location(chat_id,latitude,longitude):
@@ -66,7 +62,6 @@ def tel_send_location(chat_id,latitude,longitude):
                 }
    
     r = requests.post(url,json=payload)
-    print("re:",r.text)
     return r
 
 def getLocation(res_name):
@@ -86,7 +81,6 @@ def getaddress(res_name):
     content = driver.page_source
     soup = BeautifulSoup(content)
     address=soup.find('span', attrs={'class':'LrzXr'})
-    print("address:",address)
     return address.text
 
 def getrating(res_name):

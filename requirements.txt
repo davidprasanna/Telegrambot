@@ -13,6 +13,7 @@ geopy==2.3.0
 googlemaps==4.7.2
 googlesearch-python==1.1.0
 greenlet==2.0.1
+gunicorn==20.1.0
 h11==0.14.0
 idna==2.10
 itsdangerous==2.1.2
