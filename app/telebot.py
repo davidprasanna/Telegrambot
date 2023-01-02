@@ -75,7 +75,7 @@ def getLocation(res_name):
 def getaddress(res_name):
     options = Options()
     options.add_argument("--headless")
-    driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver",options=options)
+    driver = webdriver.Chrome('./chromedriver',options=options)
     url = 'https://google.com/search?q=' + res_name
     driver.get(url)
     content = driver.page_source
@@ -86,7 +86,7 @@ def getaddress(res_name):
 def getrating(res_name):
     options = Options()
     options.add_argument("--headless")
-    driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver",options=options)
+    driver = webdriver.Chrome('./chromedriver',options=options)
     url = 'https://google.com/search?q=' + res_name
     driver.get(url)
     content = driver.page_source
@@ -97,7 +97,7 @@ def getrating(res_name):
 def getlatlng(res_name):
     options = Options()
     options.add_argument("--headless")
-    driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver",options=options)
+    driver = webdriver.Chrome('./chromedriver',options=options)
     url = 'https://google.com/search?q=' + res_name
     driver.get(url)
     ele=driver.find_element("link text",'Maps')
@@ -109,9 +109,9 @@ def getlatlng(res_name):
     return lat , long
 
 def getmenu(res_name):
-    # options = Options()
-    # options.add_argument("--headless")
-    driver = webdriver.Chrome("/usr/lib/chromium-browser/chromedriver")
+    options = Options()
+    options.add_argument("--headless")
+    driver = webdriver.Chrome('./chromedriver',options=options)
     url = 'https://google.com/search?q=' + res_name
     driver.get(url)
     ele=driver.find_element("link text",'Images')
