@@ -36,7 +36,7 @@ def delete_row(rows):
     db.session.flush()
 
 def get_engine():
-    db_uri ="postgresql://{0}:{1}@{2}/{3}?sslmode=enable".format(config_data['Database_credentials']['Database_username'],config_data['Database_credentials']['Database_password'],config_data['Database_credentials']['host'],config_data['Database_credentials']['Database_name'])
+    db_uri ="postgresql://{0}:{1}@{2}/{3}".format(config_data['Database_credentials']['Database_username'],config_data['Database_credentials']['Database_password'],config_data['Database_credentials']['host'],config_data['Database_credentials']['Database_name'])
     return create_engine(db_uri)
 
 
