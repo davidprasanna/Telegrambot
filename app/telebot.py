@@ -2,6 +2,7 @@ from flask import Flask
 from flask import request
 from flask import Response
 import requests
+import os
 from requests.structures import CaseInsensitiveDict
 import database as database
 import pandas as pd
@@ -75,12 +76,14 @@ def getLocation(res_name):
 def getaddress(res_name):
     options = Options()
     options.add_argument("--headless")
-    driver = webdriver.Chrome('app/chromedriver',options=options)
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"),options=options)
     url = 'https://google.com/search?q=' + res_name
     driver.get(url)
     content = driver.page_source
     soup = BeautifulSoup(content)
     address=soup.find('span', attrs={'class':'LrzXr'})
+    if address == None:
+        return ''
     return address.text
 
 def getrating(res_name):
@@ -149,9 +152,12 @@ def index():
         elif "get location" in txt.lower():
             res_name=txt.split(':')[1]
             address = getaddress(res_name)
-            tel_send_message(chat_id,"Restaurent address:\n-{}".format(address),'Markdown')
-            latitude,longitude = getlatlng(res_name)
-            tel_send_location(chat_id,latitude,longitude)
+            if address == '':
+                tel_send_message(chat_id,"Restaurent address not found",'Markdown')
+            else:
+                tel_send_message(chat_id,"Restaurent address:\n-{}".format(address),'Markdown')
+                latitude,longitude = getlatlng(res_name)
+                tel_send_location(chat_id,latitude,longitude)
         elif "get res" in txt.lower():
             area=txt.split(':')[1].strip()
             res_list=Restaurent.query.filter(Restaurent.location.contains(area)).all()
