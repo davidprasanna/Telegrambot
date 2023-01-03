@@ -78,6 +78,7 @@ def getLocation(res_name):
 def getaddress(res_name):
     options = Options()
     options.add_argument("--headless")
+    options.binary_location = '/opt/render/project/.render/chrome/opt/google/chrome/google-chrome'
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=options)
     url = 'https://google.com/search?q=' + res_name
     driver.get(url)
@@ -91,6 +92,7 @@ def getaddress(res_name):
 def getrating(res_name):
     options = Options()
     options.add_argument("--headless")
+    options.binary_location = '/opt/render/project/.render/chrome/opt/google/chrome/google-chrome'
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=options)
     url = 'https://google.com/search?q=' + res_name
     driver.get(url)
@@ -102,6 +104,7 @@ def getrating(res_name):
 def getlatlng(res_name):
     options = Options()
     options.add_argument("--headless")
+    options.binary_location = '/opt/render/project/.render/chrome/opt/google/chrome/google-chrome'
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=options)
     url = 'https://google.com/search?q=' + res_name
     driver.get(url)
@@ -116,6 +119,7 @@ def getlatlng(res_name):
 def getmenu(res_name):
     options = Options()
     options.add_argument("--headless")
+    options.binary_location = '/opt/render/project/.render/chrome/opt/google/chrome/google-chrome'
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=options)
     url = 'https://google.com/search?q=' + res_name
     driver.get(url)
