@@ -1,7 +1,7 @@
 {
     "Database_credentials" : {
         "Database_username" : "david",
-        "host" : "dpg-ce9da8mn6mpgqu8p4gj0-a",
+        "host" : "dpg-ce9da8mn6mpgqu8p4gj0-a.oregon-postgres.render.com",
         "Database_name":"telegrambotdb",
         "Database_password" : "pyRSUqsBoWgshK4B4eJdL93l5S9sPLDr"
     }
