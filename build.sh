@@ -15,9 +15,7 @@ if [[ ! -d $STORAGE_DIR/chrome ]]; then
   cd $HOME/project/src # Make sure we return to where we were
 else
   echo "...Using Chrome from cache"
-fi
-dpkg -l | grep chrome
-whereis google-chrome-stable
+
 # be sure to add Chromes location to the PATH as part of your Start Command
 export PATH="${PATH}:/opt/render/project/.render/chrome/opt/google/chrome/"
 
