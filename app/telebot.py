@@ -3,6 +3,7 @@ from flask import request
 from flask import Response
 import requests
 import os
+import openai
 from requests.structures import CaseInsensitiveDict
 import database as database
 import pandas as pd
@@ -25,7 +26,8 @@ app = Flask(__name__)
 db_uri = "postgresql://{0}:{1}@{2}/{3}".format(config_data['Database_credentials']['Database_username'],config_data['Database_credentials']['Database_password'],config_data['Database_credentials']['host'],config_data['Database_credentials']['Database_name'])
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+openai.api_key = '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'
+chatbot_mode = False
 db.init_app(app)
 
 with app.app_context():
@@ -138,65 +140,87 @@ def index():
     if request.method == 'POST':
         msg = request.get_json()
         chat_id,txt = parse_message(msg)
-        if txt.lower() == "hi":
-            username = msg['message']['from']['first_name']
-            description = "Hello {} I am wanderlust bot and some of the feature i have are:\n-To add your fav restaurent typein--> *add res: <restaurant_name>*\n-To list all the fav restaurent--> *list res*\n-To get location of the restaurent--> *get location: <restaurent name>*\n-To get Restaurent in particular location--> *get res:<location>*".format(username)
-            tel_send_message(chat_id,description,'Markdown')
-        elif "add res" in txt.lower():
-            res_name=txt.split(':')[1]
-            loc = getaddress(res_name)
-            obj = Restaurent(
-                RestaurentName=res_name.split(',')[0],
-                location=loc,
-                Area='',
-                AddedBy=msg['message']['from']['first_name']
-            )
-            insert_row(obj)
-            commit_session()
-            close_session()
-            tel_send_message(chat_id,"Restaurent successfully added to the list",'Markdown')
-        elif "get location" in txt.lower():
-            res_name=txt.split(':')[1]
-            address = getaddress(res_name)
-            if address == '':
-                tel_send_message(chat_id,"Restaurent address not found",'Markdown')
+        global chatbot_mode
+        if ("chatbot" in txt.lower()) or (chatbot_mode == True):
+            if chatbot_mode == False:
+                description='Hello, I am dave your chatbot!!!'
+                tel_send_message(chat_id,description,'Markdown')
+                chatbot_mode = True
+            elif 'exit' in txt.lower():
+                chatbot_mode = False
+                tel_send_message(chat_id,'Thanks for trying out,bye....','Markdown')
             else:
-                tel_send_message(chat_id,"Restaurent address:\n-{}".format(address),'Markdown')
-                latitude,longitude = getlatlng(res_name)
-                tel_send_location(chat_id,latitude,longitude)
-        elif "get res" in txt.lower():
-            area=txt.split(':')[1].strip()
-            res_list=Restaurent.query.filter(Restaurent.location.contains(area)).all()
-            rest = pd.DataFrame([(d.id, d.RestaurentName, d.location)for d in res_list],
-                                columns=["id", "RestaurentName", "location"])
-            text="Restaurent list in {} location:".format(area)
-            for index, row in rest.iterrows():
-                text = text + "\n-{}".format(row['RestaurentName'])
-            tel_send_message(chat_id,text,'Markdown')
-        elif "grd" in txt.lower():
-            res_name=txt.split(':')[1].strip()
-            rating=getrating(res_name)
-            text='*{}\nRated: {} out of 5*'.format(res_name,rating)
-            tel_send_message(chat_id,text,'Markdown')
-        elif "get menu" in txt.lower():
-            res_name=txt.split(':')[1]
-            img=getmenu(res_name)
-            # tel_send_image(chat_id,img)
-        elif "list res" in txt.lower():
-            obj=Restaurent.query.all()
-            rest = pd.DataFrame([(d.id, d.RestaurentName, d.location)for d in obj],
-                                columns=["id", "RestaurentName", "location"])
-            if rest.empty == False:
-                restaurent = "The list of fav restaurent are:"
-                for index, row in rest.iterrows():  
-                    restaurent = restaurent + '\n-{0}'.format(row['RestaurentName'])
-                tel_send_message(chat_id,restaurent,'Markdown')
-            else:
-                tel_send_message(chat_id,'No restaurent added.','Markdown')
+                response = openai.Completion.create(
+                model="text-davinci-001",
+                prompt=txt,
+                temperature=0.4,
+                max_tokens=64,
+                top_p=1,
+                frequency_penalty=0,
+                presence_penalty=0
+                )
+                description=response.choices[0].text
+                tel_send_message(chat_id,description,'Markdown')
         else:
-            username = msg['message']['from']['first_name']
-            description = "Hello {} I am wanderlust bot and some of the feature i have are:\n-To add your fav restaurent type--> *add res: <restaurant_name>*\n-To list all the fav restaurent--> *list res*\n-To get location of the restaurent--> *get location: <restaurent name>*\n-To get Restaurent in particular location--> *get res:<location>*".format(username)
-            tel_send_message(chat_id,description,'Markdown')
+            if txt.lower() == "hi":
+                username = msg['message']['from']['first_name']
+                description = "Hello {} I am wanderlust bot and some of the feature i have are:\n-To add your fav restaurent typein--> *add res: <restaurant_name>*\n-To list all the fav restaurent--> *list res*\n-To get location of the restaurent--> *get location: <restaurent name>*\n-To get Restaurent in particular location--> *get res:<location>*".format(username)
+                tel_send_message(chat_id,description,'Markdown')
+            elif "add res" in txt.lower():
+                res_name=txt.split(':')[1]
+                loc = getaddress(res_name)
+                obj = Restaurent(
+                    RestaurentName=res_name.split(',')[0],
+                    location=loc,
+                    Area='',
+                    AddedBy=msg['message']['from']['first_name']
+                )
+                insert_row(obj)
+                commit_session()
+                close_session()
+                tel_send_message(chat_id,"Restaurent successfully added to the list",'Markdown')
+            elif "get location" in txt.lower():
+                res_name=txt.split(':')[1]
+                address = getaddress(res_name)
+                if address == '':
+                    tel_send_message(chat_id,"Restaurent address not found",'Markdown')
+                else:
+                    tel_send_message(chat_id,"Restaurent address:\n-{}".format(address),'Markdown')
+                    latitude,longitude = getlatlng(res_name)
+                    tel_send_location(chat_id,latitude,longitude)
+            elif "get res" in txt.lower():
+                area=txt.split(':')[1].strip()
+                res_list=Restaurent.query.filter(Restaurent.location.contains(area)).all()
+                rest = pd.DataFrame([(d.id, d.RestaurentName, d.location)for d in res_list],
+                                    columns=["id", "RestaurentName", "location"])
+                text="Restaurent list in {} location:".format(area)
+                for index, row in rest.iterrows():
+                    text = text + "\n-{}".format(row['RestaurentName'])
+                tel_send_message(chat_id,text,'Markdown')
+            elif "grd" in txt.lower():
+                res_name=txt.split(':')[1].strip()
+                rating=getrating(res_name)
+                text='*{}\nRated: {} out of 5*'.format(res_name,rating)
+                tel_send_message(chat_id,text,'Markdown')
+            elif "get menu" in txt.lower():
+                res_name=txt.split(':')[1]
+                img=getmenu(res_name)
+                # tel_send_image(chat_id,img)
+            elif "list res" in txt.lower():
+                obj=Restaurent.query.all()
+                rest = pd.DataFrame([(d.id, d.RestaurentName, d.location)for d in obj],
+                                    columns=["id", "RestaurentName", "location"])
+                if rest.empty == False:
+                    restaurent = "The list of fav restaurent are:"
+                    for index, row in rest.iterrows():  
+                        restaurent = restaurent + '\n-{0}'.format(row['RestaurentName'])
+                    tel_send_message(chat_id,restaurent,'Markdown')
+                else:
+                    tel_send_message(chat_id,'No restaurent added.','Markdown')
+            else:
+                username = msg['message']['from']['first_name']
+                description = "Hello {} I am wanderlust bot and some of the feature i have are:\n-To add your fav restaurent type--> *add res: <restaurant_name>*\n-To list all the fav restaurent--> *list res*\n-To get location of the restaurent--> *get location: <restaurent name>*\n-To get Restaurent in particular location--> *get res:<location>*".format(username)
+                tel_send_message(chat_id,description,'Markdown')
        
         return Response('ok', status=200)
     else:
